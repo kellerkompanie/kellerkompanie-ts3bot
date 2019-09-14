@@ -2,6 +2,7 @@ import json
 import os
 
 import ts3API.Events as Events
+import ts3API.TS3Connection
 from ts3API.TS3Connection import TS3Connection
 
 settings = None
@@ -62,7 +63,11 @@ if __name__ == "__main__":
     # Find the channel to move the query client to
     channel = ts3conn.channelfind(pattern=settings['default_channel'])[0]["cid"]
     # Give the Query Client a name
-    ts3conn.clientupdate(["client_nickname=" + nickname])
+    try:
+        ts3conn.clientupdate(["client_nickname=" + nickname])
+    except ts3API.TS3Connection.TS3QueryException:
+        pass
+
     # Move the Query client
     ts3conn.clientmove(channel, int(ts3conn.whoami()["client_id"]))
     # Register for server wide events

@@ -42,16 +42,27 @@ def on_event(sender, **kw):
 if __name__ == "__main__":
     load_config()
 
+    user = settings['user']
+    password = settings['password']
+    host = settings['host']
+    port = settings['port']
+    nickname = settings['nickname']
+
+    print("KeKo Bot starting")
+    print("connecting to", host, "on port", port)
+    print("query login as", user, "with password", password)
+    print("using nickname", nickname)
+
     # Connect to the Query Port
-    ts3conn = TS3Connection(settings['host'], settings['port'])
+    ts3conn = TS3Connection(host, port)
     # Login with query credentials
-    ts3conn.login(settings['user'], settings['password'])
+    ts3conn.login(user, password)
     # Choose a virtual server
     ts3conn.use(sid=settings['sid'])
     # Find the channel to move the query client to
     channel = ts3conn.channelfind(pattern=settings['default_channel'])[0]["cid"]
     # Give the Query Client a name
-    ts3conn.clientupdate(["client_nickname=" + settings['nickname']])
+    ts3conn.clientupdate(["client_nickname=" + nickname])
     # Move the Query client
     ts3conn.clientmove(channel, int(ts3conn.whoami()["client_id"]))
     # Register for server wide events

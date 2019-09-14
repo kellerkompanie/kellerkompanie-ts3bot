@@ -69,5 +69,8 @@ if __name__ == "__main__":
     ts3conn.register_for_server_events(on_event)
     # Register for private messages
     ts3conn.register_for_private_messages(on_event)
+
+    ts3conn.sendtextmessage(targetmode=3, target=1, msg="Hallo, I bims!")
+
     # Start the loop to send connection keepalive messages
     ts3conn.start_keepalive_loop()

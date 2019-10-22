@@ -35,9 +35,23 @@ def on_event(sender, **kw):
     # Get the parsed event from the dictionary
     event = kw["event"]
     if type(event) is Events.TextMessageEvent:
+        print("Event invoker_id: ", event.invoker_id)
         # Prevent the client from sending messages to itself
         if event.invoker_id != int(ts3conn.whoami()["client_id"]):
-            ts3conn.sendtextmessage(targetmode=1, target=event.invoker_id, msg="I received your message!")
+            # Bot hört nur noch auf bestimmte commands
+            if (event.message.startswith("!hi")):
+                ts3conn.sendtextmessage(targetmode=1, target=event.invoker_id, msg="Hallo " + event.invoker_name + "!")
+            elif (event.message.startswith("!edit")):
+                ts3conn.sendtextmessage(targetmode=1, target=event.invoker_id, msg="OK! Und los...")
+                # Channel mit Datum+Missionsname wird umbenannt
+                # ts3conn.channeledit(cid=34, channel_name="Datum 19:30 - Mission")
+    # Idee: Bot reagiert wenn jmd in seinen Channel geht und öffnet chat:
+    # Event geht nicht.
+    # elif type(event) is Events.:
+    # print("TestTest")
+    # print ("Event client_id: ", event.client_id)
+    # if event.elient_id != int(ts3conn.whoami()["client_id"]):
+    # ts3conn.sendtextmessage(targetmode=1, target=event.client_id, msg="Hallo, I bims 1 KeKo Bot!")
 
 
 if __name__ == "__main__":
@@ -76,7 +90,7 @@ if __name__ == "__main__":
     ts3conn.register_for_private_messages(on_event)
 
     ts3conn.register_for_channel_messages(on_event)
-    ts3conn.sendtextmessage(targetmode=3, target=1, msg="Hallo, I bims!")
+    # ts3conn.sendtextmessage(targetmode=3, target=1, msg="Hallo, I bims!")
 
     # Start the loop to send connection keepalive messages
     ts3conn.start_keepalive_loop()

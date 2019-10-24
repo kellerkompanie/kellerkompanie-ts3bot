@@ -4,6 +4,7 @@ import os
 import ts3API.Events as Events
 import ts3API.TS3Connection
 from ts3API.TS3Connection import TS3Connection
+from database import Database
 
 CONFIG_FILEPATH = 'keko_bot.json'
 
@@ -31,6 +32,7 @@ class KeKoBot:
         self.server_id = 1
         self.client_id = None
         self.load_settings()
+        self.database = Database()
 
     def load_settings(self):
         if os.path.exists(CONFIG_FILEPATH):

@@ -70,8 +70,6 @@ class Database:
         for row in rows:
             authkeys.append(row[0])
 
-        print("authkeys:", authkeys)
-
         return authkeys
 
     def generate_authkey(self, teamspeak_uid):

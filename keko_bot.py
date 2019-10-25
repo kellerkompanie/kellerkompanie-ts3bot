@@ -93,7 +93,7 @@ class KeKoBot:
             self.on_client_moved_to_own_channel(moved_client)
 
     def on_text_message(self, event):
-        chat_partner: Client = self.get_client(event.invoker_id)
+        chat_partner = self.get_client(event.invoker_id)
 
         # Prevent the client from sending messages to itself
         if chat_partner.client_id != self.client_id:

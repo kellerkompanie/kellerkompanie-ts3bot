@@ -42,7 +42,11 @@ class Database:
         row = cursor.fetchone()
         cursor.close()
         connection.close()
-        return row['user_id']
+
+        if row:
+            return row['user_id']
+        else:
+            return None
 
     def has_user_id(self, teamspeak_uid):
         return self.get_user_id(teamspeak_uid) is not None

@@ -68,7 +68,7 @@ class Database:
 
         authkeys = []
         for row in rows:
-            authkeys.append(row['authkey'])
+            authkeys.append(row[0])
 
         print("authkeys:", authkeys)
 

@@ -56,8 +56,27 @@ class Database:
         alphabet = string.ascii_letters + string.digits
         return ''.join(random.choice(alphabet) for i in range(32))
 
+    def _get_authkeys(self):
+        connection = self.create_connection()
+        cursor = connection.cursor()
+
+        sql = "SELECT authkey FROM teamspeak_authkeys;"
+        cursor.execute(sql)
+        rows = cursor.fetchall()
+        cursor.close()
+        connection.close()
+
+        authkeys = []
+        for row in rows:
+            authkeys.append(row['authkey'])
+
+        return authkeys
+
     def generate_authkey(self, teamspeak_uid):
+        authkeys = self._get_authkeys()
         authkey = self._generate_authkey()
+        while authkey in authkeys:
+            authkey = self._generate_authkey()
 
         connection = self.create_connection()
         cursor = connection.cursor()

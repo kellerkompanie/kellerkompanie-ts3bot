@@ -93,7 +93,7 @@ class KeKoBot:
             self.on_client_moved_to_own_channel(moved_client)
 
     def on_text_message(self, event):
-        chat_partner = self.get_client(event.invoker_id)
+        chat_partner: Client = self.get_client(event.invoker_id)
 
         # Prevent the client from sending messages to itself
         if chat_partner.client_id != self.client_id:
@@ -105,6 +105,12 @@ class KeKoBot:
                 self.ts3conn.sendtextmessage(targetmode=1, target=chat_partner.client_id, msg="OK! Und los...")
                 # Channel mit Datum+Missionsname wird umbenannt
                 # ts3conn.channeledit(cid=34, channel_name="Datum 19:30 - Mission")
+            elif event.message.startswith("!link"):
+                teamspeak_uid = chat_partner.client_uid
+                has_user_id = self.database.has_user_id(teamspeak_uid)
+                self.ts3conn.sendtextmessage(targetmode=1, target=chat_partner.client_id, msg="has_user_id: " + str(has_user_id))
+                authkey_link = self.database.generate_authkey(teamspeak_uid)
+                self.ts3conn.sendtextmessage(targetmode=1, target=chat_partner.client_id, msg=authkey_link)
 
     def on_client_entered(self, event):
         client_name = event.client_name

@@ -3,8 +3,8 @@ import os
 
 import ts3API.Events as Events
 import ts3API.TS3Connection
-from ts3API.TS3Connection import TS3Connection
 from database import Database
+from ts3API.TS3Connection import TS3Connection
 
 CONFIG_FILEPATH = 'keko_bot.json'
 
@@ -108,7 +108,11 @@ class KeKoBot:
             elif event.message.startswith("!link"):
                 teamspeak_uid = chat_partner.client_uid
                 has_user_id = self.database.has_user_id(teamspeak_uid)
-                self.ts3conn.sendtextmessage(targetmode=1, target=chat_partner.client_id, msg="has_user_id: " + str(has_user_id))
+                user_id = self.database.get_user_id(teamspeak_uid)
+                self.ts3conn.sendtextmessage(targetmode=1, target=chat_partner.client_id,
+                                             msg="has_user_id: " + str(has_user_id))
+                self.ts3conn.sendtextmessage(targetmode=1, target=chat_partner.client_id,
+                                             msg="user_id: " + str(user_id))
                 authkey_link = self.database.generate_authkey(teamspeak_uid)
                 self.ts3conn.sendtextmessage(targetmode=1, target=chat_partner.client_id, msg=authkey_link)
 

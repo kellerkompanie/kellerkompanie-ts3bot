@@ -44,7 +44,7 @@ class Database:
         connection.close()
 
         if row:
-            return row['user_id']
+            return row
         else:
             return None
 

@@ -44,7 +44,7 @@ class Database:
         connection.close()
 
         if row:
-            return row
+            return row[0]
         else:
             return None
 
@@ -69,6 +69,8 @@ class Database:
         authkeys = []
         for row in rows:
             authkeys.append(row['authkey'])
+
+        print("authkeys:", authkeys)
 
         return authkeys
 

@@ -127,8 +127,7 @@ class KeKoBot:
         client = Client(client_id=client_id, client_uid=client_uid, client_name=client_name)
         self.set_client(client_id, client)
 
-        params = {'teamspeak_uid': client_uid}
-        r = requests.get(url="https://kellerkompanie.com/teamspeak/link_account.php", params=params)
+        r = requests.get(url="https://kellerkompanie.com/teamspeak/link_account.php?teamspeak_uid={}".format(client_uid))
         data = r.json()
         has_account = data['has_account']
 
@@ -187,6 +186,9 @@ class KeKoBot:
         data = {'teamspeak_uids': client_uids}
         response = requests.post(url='https://kellerkompanie.com/teamspeak/link_account.php', data=json.dumps(data))
         # check all clients and send link account for the ones without account
+
+        print(response.json())
+
         have_accounts = response.json()['have_accounts']
         for client_uid, has_account in have_accounts:
             if not has_account:

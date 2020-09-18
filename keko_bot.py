@@ -1,5 +1,6 @@
 import json
 import os
+import requests
 
 import ts3API.Events as Events
 import ts3API.TS3Connection
@@ -27,7 +28,7 @@ class KeKoBot:
         self.password = 'password'
         self.host = '0.0.0.0'
         self.port = 10011
-        self.nickname = 'KeKo Bot'
+        self.nickname = 'Kellerkompanie Bot'
         self.default_channel = 'Botchannel'
         self.server_id = 1
         self.client_id = None
@@ -122,6 +123,16 @@ class KeKoBot:
         client_id = event.client_id
         client = Client(client_id=client_id, client_uid=client_uid, client_name=client_name)
         self.set_client(client_id, client)
+
+        params = {'teamspeak_uid': client_uid}
+        r = requests.get(url="https://kellerkompanie.com/teamspeak/link_account.php", params=params)
+        data = r.json()
+        has_account = data['has_account']
+
+        if not has_account:
+            authkey_link = self.database.generate_authkey(client_uid)
+            self.ts3conn.sendtextmessage(targetmode=1, target=client_id.client_id, msg=authkey_link)
+
         print("client entered", client)
 
     def on_client_left(self, event):
@@ -136,7 +147,7 @@ class KeKoBot:
         self.ts3conn.sendtextmessage(targetmode=1, target=client.client_id, msg="Hallo, I bims 1 KeKo Bot!")
 
     def start_bot(self):
-        print("KeKo Bot starting")
+        print("Kellerkompanie Bot starting")
         print("connecting to {}:{} as {}".format(self.host, self.port, self.nickname))
 
         # Connect to the Query Port
@@ -159,6 +170,7 @@ class KeKoBot:
 
         # Iterate through all currently connected clients
         print("currently connected clients:")
+        client_uids = []
         for client in self.ts3conn.clientlist():
             client_id = int(client["clid"])
             client_nickname = client["client_nickname"]
@@ -167,6 +179,16 @@ class KeKoBot:
             client = Client(client_id=client_id, client_uid=client_uid, client_name=client_nickname)
             self.set_client(client_id, client)
             print("\t", client)
+            client_uids.append(client_uid)
+
+        data = {'teamspeak_uids': client_uids}
+        response = requests.post(url='https://kellerkompanie.com/teamspeak/link_account.php', data=json.dumps(data))
+        # check all clients and send link account for the ones without account
+        have_accounts = response.json()['have_accounts']
+        for client_uid, has_account in have_accounts:
+            if not has_account:
+                # TODO send link to client for account linking
+                pass
 
         # Find own client id
         self.client_id = int(self.ts3conn.whoami()["client_id"])

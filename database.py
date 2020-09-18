@@ -88,4 +88,4 @@ class Database:
         cursor.close()
         connection.close()
 
-        return "https://kellerkompanie.com/link_teamspeak.php?authkey=" + authkey
+        return "https://kellerkompanie.com/teamspeak/link_account.php?authkey=" + authkey

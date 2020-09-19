@@ -150,6 +150,8 @@ class KeKoBot:
         if not group_id:
             raise ValueError("No group found for name '{}'".format(group_name))
 
+        print("found group_id for '{}': {}".format(group_id, group_name))
+
         return group_id in self.get_client_groups(client_id)
 
     def get_client_groups(self, client_id):

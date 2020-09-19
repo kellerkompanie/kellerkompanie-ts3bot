@@ -3,7 +3,6 @@
 
 import json
 import os
-import requests
 
 import ts3API.Events as Events
 import ts3API.TS3Connection
@@ -127,15 +126,10 @@ class KeKoBot:
         client = Client(client_id=client_id, client_uid=client_uid, client_name=client_name)
         self.set_client(client_id, client)
 
-        r = requests.get(url="https://kellerkompanie.com/teamspeak/link_account.php?teamspeak_uid={}".format(client_uid))
-        data = r.json()
-        has_account = data['has_account']
-
-        if not has_account:
-            authkey_link = self.database.generate_authkey(client_uid)
-            self.ts3conn.sendtextmessage(targetmode=1, target=client_id.client_id, msg=authkey_link)
-
         print("client entered", client)
+
+        if not self.database.has_user_id(client_uid):
+            self.send_link_account_message(client_id, client_uid)
 
     def on_client_left(self, event):
         client_id = event.client_id
@@ -147,6 +141,12 @@ class KeKoBot:
         print("client entered own channel:", client)
         # Idee: Bot reagiert wenn jmd in seinen Channel geht und öffnet chat:
         self.ts3conn.sendtextmessage(targetmode=1, target=client.client_id, msg="Hallo, I bims 1 KeKo Bot!")
+
+    def send_link_account_message(self, client_id, client_uid):
+        authkey_link = self.database.generate_authkey(client_uid)
+        message = "Es scheint als wäre dein Teamspeak User nicht mit der Kellerkompanie Webseite verknüpft." + \
+                  "Klicke auf folgenden Link um die Accounts zu verknüpfen: {}".format(authkey_link)
+        self.ts3conn.sendtextmessage(targetmode=1, target=client_id, msg=message)
 
     def start_bot(self):
         print("Kellerkompanie Bot starting")
@@ -172,7 +172,6 @@ class KeKoBot:
 
         # Iterate through all currently connected clients
         print("currently connected clients:")
-        client_uids = []
         for client in self.ts3conn.clientlist():
             client_id = int(client["clid"])
             client_nickname = client["client_nickname"]
@@ -181,19 +180,9 @@ class KeKoBot:
             client = Client(client_id=client_id, client_uid=client_uid, client_name=client_nickname)
             self.set_client(client_id, client)
             print("\t", client)
-            client_uids.append(client_uid)
 
-        data = {'teamspeak_uids': client_uids}
-        response = requests.post(url='https://kellerkompanie.com/teamspeak/link_account.php', data=json.dumps(data))
-        # check all clients and send link account for the ones without account
-
-        print(response.json())
-
-        have_accounts = response.json()['have_accounts']
-        for client_uid, has_account in have_accounts:
-            if not has_account:
-                # TODO send link to client for account linking
-                pass
+            if not self.database.has_user_id(client_uid):
+                self.send_link_account_message(client_id, client_uid)
 
         # Find own client id
         self.client_id = int(self.ts3conn.whoami()["client_id"])

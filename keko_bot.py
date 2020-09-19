@@ -128,6 +128,9 @@ class KeKoBot:
 
         print("client entered", client)
 
+        client_info = self.ts3conn.clientinfo(client_id=client_id)
+        print(client_info)
+
         if not self.database.has_user_id(client_uid):
             self.send_link_account_message(client_id, client_uid)
 

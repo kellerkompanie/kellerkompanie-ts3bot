@@ -1,8 +1,3 @@
-[b]
-Willkommen auf dem TS der Kellerkompanie!
+Herzlich Willkommen auf dem Kellerkompanie Teamspeak!
 
-Die News des Tages:
-Schon geschaut was es Neues im [URL=https://kellerkompanie.com/forum/index.php]Kellerkompanie Forum[/URL] gibt?
-
-Das neue [URL=https://wiki.kellerkompanie.com/index.php/Hauptseite]KeKo Wiki[/URL] bündelt Grund- und Spezialwissen, Infos rund um das Thema Missionsbau und Wissenswertes zu allen KeKo Kampangen. Schaut mal rein!
-[/b]
+Wenn du neu hier bist, setze dich einfach in den Channel "Ich bin neu hier, bitte helft mir!" und warte geduldig bis jemand zu dir kommt. Deine aktuelle Gruppe ist "Guest" und hat nur eingeschränkte Rechte, bspw. kannst du Leute anschreiben, aber nicht anstupsen.

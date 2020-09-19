@@ -144,14 +144,12 @@ class KeKoBot:
 
         group_id = None
         for server_group in server_groups:
-            if server_group['name'] == group_name:
+            if server_group['type'] == '1' and server_group['name'] == group_name:
                 group_id = int(server_group['sgid'])
                 break
 
         if not group_id:
             raise ValueError("No group found for name '{}'".format(group_name))
-
-        print("found group_id for '{}': {}".format(group_id, group_name))
 
         return group_id in self.get_client_groups(client_id)
 
@@ -244,8 +242,6 @@ class KeKoBot:
 
         # Start the loop to send connection keepalive messages
         self.ts3conn.start_keepalive_loop()
-
-        print("server_groups:", self.ts3conn.servergrouplist())
 
 
 if __name__ == "__main__":

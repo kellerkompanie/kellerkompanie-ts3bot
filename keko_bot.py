@@ -211,7 +211,7 @@ class KeKoBot:
             self.set_client(client_id, client)
             print("\t", client)
 
-            if client_id != self.client_id:
+            if client_id == self.client_id:
                 continue
 
             if self.is_guest(client_id):

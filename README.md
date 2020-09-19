@@ -132,7 +132,7 @@ WantedBy=multi-user.target
 ```
 To assure that the logfiles are created we will add our service to rsyslog:
 ```
-nano /etc/rsyslog.d/ts3bot.conf
+sudo nano /etc/rsyslog.d/ts3bot.conf
 ```
 With the following content:
 ```
@@ -141,8 +141,8 @@ if $programname == 'ts3bot' then /var/log/ts3bot.log
 ```
 Now we create the logfile and make it readable for syslog:
 ```
-touch /var/log/ts3bot.log
-chown syslog:adm /var/log/ts3bot.log
+sudo touch /var/log/ts3bot.log
+sudo chown root:adm /var/log/ts3bot.log
 sudo systemctl restart rsyslog
 ```
 Finally we enable the service and register it to run on boot:

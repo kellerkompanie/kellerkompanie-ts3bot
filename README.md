@@ -63,11 +63,16 @@ followed by ```y``` and ```ENTER```
 cd /home/ts3bot/kellerkompanie-ts3bot
 git pull
 source venv/bin/activate
-python keko_bot.py
+python keko_bot.py > /var/log/ts3bot.log 2>&1
 ```
 Make the shell script executable:
 ```
 chmod +x start_bot.sh
+```
+Create the log file and set permissions for ts3bot to be able to write:
+```
+sudo touch /var/log/ts3bot.log
+sudo chown ts3bot:ts3bot /var/log/ts3bot.log
 ```
 Now you can run the interface using
 ```
@@ -122,29 +127,12 @@ After=network.target
 User=ts3bot
 ExecStart=/home/ts3bot/start_bot.sh
 WorkingDirectory=/home/ts3bot
-StandardOutput=syslog
-StandardError=syslog
-SyslogIdentifier=ts3bot
 Restart=always
 
 [Install]
 WantedBy=multi-user.target
 ```
-To assure that the logfiles are created we will add our service to rsyslog:
-```
-sudo nano /etc/rsyslog.d/ts3bot.conf
-```
-With the following content:
-```
-if $programname == 'ts3bot' then /var/log/ts3bot.log
-& stop
-```
-Now we create the logfile and make it readable for syslog:
-```
-sudo touch /var/log/ts3bot.log
-sudo chown root:adm /var/log/ts3bot.log
-sudo systemctl restart rsyslog
-```
+
 Finally we enable the service and register it to run on boot:
 ```
 sudo systemctl daemon-reload

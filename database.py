@@ -118,6 +118,7 @@ class Database:
         return authkeys
 
     def generate_authkey(self, teamspeak_uid):
+        # TODO remove previous and outdated authkeys
         authkeys = self._get_authkeys()
         authkey = self._generate_authkey()
         while authkey in authkeys:

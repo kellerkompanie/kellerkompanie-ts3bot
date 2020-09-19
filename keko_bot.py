@@ -136,7 +136,7 @@ class KeKoBot:
             self.send_link_account_message(client_id, client_uid, client_name)
 
     def is_guest(self, client_id):
-        return self.is_client_in_group(client_id, 'Gast')
+        return self.is_client_in_group(client_id, 'Guest')
 
     def is_client_in_group(self, client_id, group_name):
         server_groups = self.ts3conn.servergrouplist()

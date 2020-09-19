@@ -73,7 +73,7 @@ class KeKoBot:
     def set_client(self, client_id, client):
         self.connected_clients[int(client_id)] = client
 
-    def on_event(self, sender, **kwargs):
+    def on_event(self, _, **kwargs):
         """
         Event handling method
         """
@@ -136,9 +136,9 @@ class KeKoBot:
             message = self.database.get_guest_welcome_message()
             self.ts3conn.sendtextmessage(targetmode=1, target=client_id, msg=message)
         elif not self.database.has_user_id(client_uid):
-            self.send_link_account_message(client_id, client_uid, client_name)
+            self.send_link_account_message(client)
         else:
-            self.update_stammspieler_status(client_dbid=client_dbid, client_uid=client_uid)
+            self.update_stammspieler_status(client)
 
     def is_guest(self, client_id):
         return self.is_client_in_group(client_id, 'Guest')
@@ -166,15 +166,19 @@ class KeKoBot:
         client_group_ids = [int(x) for x in client_info['client_servergroups'].split(',')]
         return client_group_ids
 
-    def update_stammspieler_status(self, client_dbid: int, client_uid: str):
+    def update_stammspieler_status(self, client: Client):
         stammspieler_sgid = self.get_server_group_by_name("Stammspieler")
-        steam_id = self.database.get_steam_id(client_uid)
+        steam_id = self.database.get_steam_id(client.client_uid)
         stammspieler_url = "https://server.kellerkompanie.com:5000/stammspieler/{}".format(steam_id)
         response = requests.get(stammspieler_url)
         stammspieler_status = bool(json.loads(response.text)['stammspieler'])
 
         if stammspieler_status:
-            self.ts3conn.clientaddservergroup(cldbid=client_dbid, sgid=stammspieler_sgid)
+            print("adding user {} to server group stammspieler".format(client.client_name))
+            self.ts3conn.clientaddservergroup(cldbid=client.client_dbid, sgid=stammspieler_sgid)
+        else:
+            print("removing user {} from server group stammspieler".format(client.client_name))
+            self.ts3conn.clientdelservergroup(cldbid=client.client_dbid, sgid=stammspieler_sgid)
 
     def on_client_left(self, event):
         client_id = event.client_id
@@ -182,15 +186,17 @@ class KeKoBot:
         del self.connected_clients[int(client_id)]
         print("client left", client)
 
-    def on_client_moved_to_own_channel(self, client):
+    @staticmethod
+    def on_client_moved_to_own_channel(client):
         print("client entered own channel:", client)
         # self.ts3conn.sendtextmessage(targetmode=1, target=client.client_id, msg="Hallo, I bims 1 KeKo Bot!")
 
-    def send_link_account_message(self, client_id, client_uid, client_name):
-        authkey_link = self.database.generate_authkey(client_uid)
-        message = "Hallo {}! Es scheint als wäre dein Teamspeak User nicht mit der Kellerkompanie Webseite verknüpft. " \
-                  "Klicke auf folgenden Link um die Accounts zu verknüpfen:\n\n{}".format(client_name, authkey_link)
-        self.ts3conn.sendtextmessage(targetmode=1, target=client_id, msg=message)
+    def send_link_account_message(self, client: Client):
+        authkey_link = self.database.generate_authkey(client.client_uid)
+        message = "Hallo {}! Deine Teamspeak Identität ist nicht mit der Kellerkompanie Webseite verknüpft. " \
+                  "Klicke auf folgenden Link um die Accounts zu verknüpfen:\n\n{}".format(client.client_name,
+                                                                                          authkey_link)
+        self.ts3conn.sendtextmessage(targetmode=1, target=client.client_id, msg=message)
 
     def start_bot(self):
         print("Kellerkompanie Bot starting")
@@ -237,9 +243,9 @@ class KeKoBot:
                 message = self.database.get_guest_welcome_message()
                 self.ts3conn.sendtextmessage(targetmode=1, target=client_id, msg=message)
             elif not self.database.has_user_id(client_uid):
-                self.send_link_account_message(client_id, client_uid, client_name)
+                self.send_link_account_message(client=client)
             else:
-                self.update_stammspieler_status(client_dbid=client_dbid, client_uid=client_uid)
+                self.update_stammspieler_status(client=client)
 
         # Move the Query client
         self.ts3conn.clientmove(channel, self.client_id)

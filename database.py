@@ -118,19 +118,32 @@ class Database:
         return authkeys
 
     def generate_authkey(self, teamspeak_uid):
-        # TODO remove previous and outdated authkeys
         authkeys = self._get_authkeys()
         authkey = self._generate_authkey()
         while authkey in authkeys:
             authkey = self._generate_authkey()
 
         connection = self.create_connection()
-        cursor = connection.cursor()
 
+        # delete previous authkeys for this user
+        cursor = connection.cursor()
+        query = "DELETE FROM teamspeak_authkeys WHERE teamspeak_uid=%s;"
+        cursor.execute(query, (teamspeak_uid,))
+        connection.commit()
+        cursor.close()
+
+        # delete outdated authkeys
+        cursor = connection.cursor()
+        query = "DELETE FROM teamspeak_authkeys WHERE generated_date < (NOW() - INTERVAL 10 MINUTE);"
+        cursor.execute(query)
+        connection.commit()
+        cursor.close()
+
+        cursor = connection.cursor()
         query = "INSERT INTO teamspeak_authkeys (authkey, teamspeak_uid, generated_date) VALUES(%s, %s, NOW());"
         cursor.execute(query, (authkey, teamspeak_uid,))
-
         connection.commit()
+
         cursor.close()
         connection.close()
 

@@ -140,7 +140,6 @@ class KeKoBot:
 
     def is_client_in_group(self, client_id, group_name):
         server_groups = self.ts3conn.servergrouplist()
-        print(server_groups)
 
         group_id = None
         for server_group in server_groups:
@@ -156,6 +155,7 @@ class KeKoBot:
     def get_client_groups(self, client_id):
         client_info = self.ts3conn.clientinfo(client_id=client_id)
         client_group_ids = [int(x) for x in client_info['client_servergroups'].split(',')]
+        print('client_group_ids:', client_group_ids)
         return client_group_ids
 
     def on_client_left(self, event):

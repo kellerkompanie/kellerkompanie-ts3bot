@@ -13,6 +13,7 @@ CONFIG_FILEPATH = 'database_config.json'
 class Database:
     def __init__(self):
         self._load_config()
+        self._insert_default_welcome_messages()
 
     def create_connection(self):
         return pymysql.connect(host=self._settings['db_host'],
@@ -32,6 +33,35 @@ class Database:
 
             with open(CONFIG_FILEPATH, 'w') as outfile:
                 json.dump(self._settings, outfile, sort_keys=True, indent=4)
+
+    def _insert_default_welcome_messages(self):
+        with open('default_guest_welcome_message.txt', 'r') as fp:
+            message = fp.read()
+
+        connection = self.create_connection()
+        cursor = connection.cursor()
+
+        query = "INSERT IGNORE INTO teamspeak_messages (message_type, message_text) VALUES(%s, %s);"
+        cursor.execute(query, ("GUEST_MSG", message,))
+
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+    def get_guest_welcome_message(self):
+        connection = self.create_connection()
+        cursor = connection.cursor()
+
+        sql = "SELECT message_text FROM teamspeak_messages WHERE message_type=%s;"
+        cursor.execute(sql, ("GUEST_MSG",))
+        row = cursor.fetchone()
+        cursor.close()
+        connection.close()
+
+        if row:
+            return row[0]
+        else:
+            return None
 
     def get_user_id(self, teamspeak_uid):
         connection = self.create_connection()

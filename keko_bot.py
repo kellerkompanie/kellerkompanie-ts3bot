@@ -130,8 +130,7 @@ class KeKoBot:
         print("client entered", client)
 
         if self.is_guest(client_id):
-            with open('guest_welcome_message.txt', 'r') as fp:
-                message = fp.read()
+            message = self.database.get_guest_welcome_message()
             self.ts3conn.sendtextmessage(targetmode=1, target=client_id, msg=message)
         elif SEND_LINKS and not self.database.has_user_id(client_uid):
             self.send_link_account_message(client_id, client_uid, client_name)
@@ -214,8 +213,7 @@ class KeKoBot:
                 continue
 
             if self.is_guest(client_id):
-                with open('guest_welcome_message.txt', 'r') as fp:
-                    message = fp.read()
+                message = self.database.get_guest_welcome_message()
                 self.ts3conn.sendtextmessage(targetmode=1, target=client_id, msg=message)
             elif SEND_LINKS and not self.database.has_user_id(client_uid):
                 self.send_link_account_message(client_id, client_uid, client_name)

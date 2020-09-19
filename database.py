@@ -78,6 +78,21 @@ class Database:
         else:
             return None
 
+    def get_steam_id(self, teamspeak_uid):
+        connection = self.create_connection()
+        cursor = connection.cursor()
+
+        sql = "SELECT steam_id FROM teamspeak_accounts WHERE teamspeak_uid=%s;"
+        cursor.execute(sql, (teamspeak_uid,))
+        row = cursor.fetchone()
+        cursor.close()
+        connection.close()
+
+        if row:
+            return row[0]
+        else:
+            return None
+
     def has_user_id(self, teamspeak_uid):
         return self.get_user_id(teamspeak_uid) is not None
 

@@ -4,20 +4,22 @@
 import json
 import os
 
+import requests
+
 import ts3API.Events as Events
 import ts3API.TS3Connection
 from database import Database
 from ts3API.TS3Connection import TS3Connection
 
 CONFIG_FILEPATH = 'keko_bot.json'
-SEND_LINKS = True
 
 
 class Client:
-    def __init__(self, client_id, client_uid, client_name):
+    def __init__(self, client_id: int, client_uid, client_name: str, client_dbid: int):
         self.client_id = client_id
         self.client_uid = client_uid
         self.client_name = client_name
+        self.client_dbid = client_dbid
 
     def __repr__(self):
         return "{} [id:{} uid:{}]".format(self.client_name, self.client_id, self.client_uid)
@@ -123,8 +125,9 @@ class KeKoBot:
     def on_client_entered(self, event):
         client_name = event.client_name
         client_uid = event.client_uid
-        client_id = event.client_id
-        client = Client(client_id=client_id, client_uid=client_uid, client_name=client_name)
+        client_id = int(event.client_id)
+        client_dbid = int(event.client_dbid)
+        client = Client(client_id=client_id, client_uid=client_uid, client_name=client_name, client_dbid=client_dbid)
         self.set_client(client_id, client)
 
         print("client entered", client)
@@ -132,13 +135,15 @@ class KeKoBot:
         if self.is_guest(client_id):
             message = self.database.get_guest_welcome_message()
             self.ts3conn.sendtextmessage(targetmode=1, target=client_id, msg=message)
-        elif SEND_LINKS and not self.database.has_user_id(client_uid):
+        elif not self.database.has_user_id(client_uid):
             self.send_link_account_message(client_id, client_uid, client_name)
+        else:
+            self.update_stammspieler_status(client_dbid=client_dbid, client_uid=client_uid)
 
     def is_guest(self, client_id):
         return self.is_client_in_group(client_id, 'Guest')
 
-    def is_client_in_group(self, client_id, group_name):
+    def get_server_group_by_name(self, group_name):
         server_groups = self.ts3conn.servergrouplist()
 
         group_id = None
@@ -150,12 +155,26 @@ class KeKoBot:
         if not group_id:
             raise ValueError("No group found for name '{}'".format(group_name))
 
+        return group_id
+
+    def is_client_in_group(self, client_id, group_name):
+        group_id = self.get_server_group_by_name(group_name)
         return group_id in self.get_client_groups(client_id)
 
     def get_client_groups(self, client_id):
         client_info = self.ts3conn.clientinfo(client_id=client_id)
         client_group_ids = [int(x) for x in client_info['client_servergroups'].split(',')]
         return client_group_ids
+
+    def update_stammspieler_status(self, client_dbid: int, client_uid: str):
+        stammspieler_sgid = self.get_server_group_by_name("Stammspieler")
+        steam_id = self.database.get_steam_id(client_uid)
+        stammspieler_url = "https://server.kellerkompanie.com:5000/stammspieler/{}".format(steam_id)
+        response = requests.get(stammspieler_url)
+        stammspieler_status = bool(json.loads(response.text)['stammspieler'])
+
+        if stammspieler_status:
+            self.ts3conn.clientaddservergroup(cldbid=client_dbid, sgid=stammspieler_sgid)
 
     def on_client_left(self, event):
         client_id = event.client_id
@@ -205,7 +224,9 @@ class KeKoBot:
             client_name = client["client_nickname"]
             client_info = self.ts3conn.clientinfo(client_id)
             client_uid = client_info["client_unique_identifier"]
-            client = Client(client_id=client_id, client_uid=client_uid, client_name=client_name)
+            client_dbid = int(client["cldbid"])
+            client = Client(client_id=client_id, client_uid=client_uid, client_name=client_name,
+                            client_dbid=client_dbid)
             self.set_client(client_id, client)
             print("\t", client)
 
@@ -215,8 +236,10 @@ class KeKoBot:
             if self.is_guest(client_id):
                 message = self.database.get_guest_welcome_message()
                 self.ts3conn.sendtextmessage(targetmode=1, target=client_id, msg=message)
-            elif SEND_LINKS and not self.database.has_user_id(client_uid):
+            elif not self.database.has_user_id(client_uid):
                 self.send_link_account_message(client_id, client_uid, client_name)
+            else:
+                self.update_stammspieler_status(client_dbid=client_dbid, client_uid=client_uid)
 
         # Move the Query client
         self.ts3conn.clientmove(channel, self.client_id)

@@ -180,8 +180,6 @@ class KeKoBot:
         print("currently connected clients:")
         for client in self.ts3conn.clientlist():
             client_id = int(client["clid"])
-            if client_id == self.client_id:
-                continue
             client_name = client["client_nickname"]
             client_info = self.ts3conn.clientinfo(client_id)
             client_uid = client_info["client_unique_identifier"]
@@ -189,7 +187,7 @@ class KeKoBot:
             self.set_client(client_id, client)
             print("\t", client)
 
-            if not self.database.has_user_id(client_uid):
+            if client_id != self.client_id and not self.database.has_user_id(client_uid):
                 self.send_link_account_message(client_id, client_uid, client_name)
 
         # Move the Query client

@@ -10,6 +10,7 @@ from database import Database
 from ts3API.TS3Connection import TS3Connection
 
 CONFIG_FILEPATH = 'keko_bot.json'
+SEND_LINKS = False
 
 
 class Client:
@@ -132,7 +133,7 @@ class KeKoBot:
             with open('guest_welcome_message.txt', 'r') as fp:
                 message = fp.read()
             self.ts3conn.sendtextmessage(targetmode=1, target=client_id, msg=message)
-        elif not self.database.has_user_id(client_uid):
+        elif SEND_LINKS and not self.database.has_user_id(client_uid):
             self.send_link_account_message(client_id, client_uid, client_name)
 
     def is_guest(self, client_id):
@@ -220,7 +221,7 @@ class KeKoBot:
                 with open('guest_welcome_message.txt', 'r') as fp:
                     message = fp.read()
                 self.ts3conn.sendtextmessage(targetmode=1, target=client_id, msg=message)
-            elif not self.database.has_user_id(client_uid):
+            elif SEND_LINKS and not self.database.has_user_id(client_uid):
                 self.send_link_account_message(client_id, client_uid, client_name)
 
         # Move the Query client
@@ -243,6 +244,8 @@ class KeKoBot:
 
         # Start the loop to send connection keepalive messages
         self.ts3conn.start_keepalive_loop()
+
+        print("server_groups:", self.ts3conn.servergrouplist())
 
 
 if __name__ == "__main__":

@@ -178,7 +178,7 @@ class KeKoBot:
         if stammspieler_status and not client_is_in_group:
             print("adding user {} to server group stammspieler".format(client.client_name))
             self.ts3conn.clientaddservergroup(cldbid=client.client_dbid, sgid=stammspieler_sgid)
-        elif client_is_in_group:
+        elif not stammspieler_status and client_is_in_group:
             print("removing user {} from server group stammspieler".format(client.client_name))
             self.ts3conn.clientdelservergroup(cldbid=client.client_dbid, sgid=stammspieler_sgid)
 

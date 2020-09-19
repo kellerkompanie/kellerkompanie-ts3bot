@@ -10,7 +10,7 @@ from database import Database
 from ts3API.TS3Connection import TS3Connection
 
 CONFIG_FILEPATH = 'keko_bot.json'
-SEND_LINKS = False
+SEND_LINKS = True
 
 
 class Client:
@@ -156,7 +156,6 @@ class KeKoBot:
     def get_client_groups(self, client_id):
         client_info = self.ts3conn.clientinfo(client_id=client_id)
         client_group_ids = [int(x) for x in client_info['client_servergroups'].split(',')]
-        print('client_group_ids:', client_group_ids)
         return client_group_ids
 
     def on_client_left(self, event):
@@ -167,8 +166,7 @@ class KeKoBot:
 
     def on_client_moved_to_own_channel(self, client):
         print("client entered own channel:", client)
-        # Idee: Bot reagiert wenn jmd in seinen Channel geht und öffnet chat:
-        self.ts3conn.sendtextmessage(targetmode=1, target=client.client_id, msg="Hallo, I bims 1 KeKo Bot!")
+        # self.ts3conn.sendtextmessage(targetmode=1, target=client.client_id, msg="Hallo, I bims 1 KeKo Bot!")
 
     def send_link_account_message(self, client_id, client_uid, client_name):
         authkey_link = self.database.generate_authkey(client_uid)

@@ -128,11 +128,35 @@ class KeKoBot:
 
         print("client entered", client)
 
-        client_info = self.ts3conn.clientinfo(client_id=client_id)
-        print(client_info)
-
-        if not self.database.has_user_id(client_uid):
+        if self.is_guest(client_id):
+            with open('guest_welcome_message.txt', 'r') as fp:
+                message = fp.read()
+            self.ts3conn.sendtextmessage(targetmode=1, target=client_id, msg=message)
+        elif not self.database.has_user_id(client_uid):
             self.send_link_account_message(client_id, client_uid, client_name)
+
+    def is_guest(self, client_id):
+        return self.is_client_in_group(client_id, 'Gast')
+
+    def is_client_in_group(self, client_id, group_name):
+        server_groups = self.ts3conn.servergrouplist()
+        print(server_groups)
+
+        group_id = None
+        for server_group in server_groups:
+            if server_group['name'] == group_name:
+                group_id = int(server_group['sgid'])
+                break
+
+        if not group_id:
+            raise ValueError("No group found for name '{}'".format(group_name))
+
+        return group_id in self.get_client_groups(client_id)
+
+    def get_client_groups(self, client_id):
+        client_info = self.ts3conn.clientinfo(client_id=client_id)
+        client_group_ids = [int(x) for x in client_info['client_servergroups'].split(',')]
+        return client_group_ids
 
     def on_client_left(self, event):
         client_id = event.client_id
@@ -187,7 +211,14 @@ class KeKoBot:
             self.set_client(client_id, client)
             print("\t", client)
 
-            if client_id != self.client_id and not self.database.has_user_id(client_uid):
+            if client_id != self.client_id:
+                continue
+
+            if self.is_guest(client_id):
+                with open('guest_welcome_message.txt', 'r') as fp:
+                    message = fp.read()
+                self.ts3conn.sendtextmessage(targetmode=1, target=client_id, msg=message)
+            elif not self.database.has_user_id(client_uid):
                 self.send_link_account_message(client_id, client_uid, client_name)
 
         # Move the Query client

@@ -224,8 +224,7 @@ class KeKoBot:
             client_name = client["client_nickname"]
             client_info = self.ts3conn.clientinfo(client_id)
             client_uid = client_info["client_unique_identifier"]
-            print("client_info.keys():", client_info.keys())
-            client_dbid = int(client_info["client_dbid"])
+            client_dbid = int(client_info["client_database_id"])
             client = Client(client_id=client_id, client_uid=client_uid, client_name=client_name,
                             client_dbid=client_dbid)
             self.set_client(client_id, client)

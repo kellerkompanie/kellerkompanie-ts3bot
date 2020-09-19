@@ -132,7 +132,7 @@ class KeKoBot:
         print(client_info)
 
         if not self.database.has_user_id(client_uid):
-            self.send_link_account_message(client_id, client_uid)
+            self.send_link_account_message(client_id, client_uid, client_name)
 
     def on_client_left(self, event):
         client_id = event.client_id
@@ -145,10 +145,10 @@ class KeKoBot:
         # Idee: Bot reagiert wenn jmd in seinen Channel geht und öffnet chat:
         self.ts3conn.sendtextmessage(targetmode=1, target=client.client_id, msg="Hallo, I bims 1 KeKo Bot!")
 
-    def send_link_account_message(self, client_id, client_uid):
+    def send_link_account_message(self, client_id, client_uid, client_name):
         authkey_link = self.database.generate_authkey(client_uid)
-        message = "Es scheint als wäre dein Teamspeak User nicht mit der Kellerkompanie Webseite verknüpft." + \
-                  "Klicke auf folgenden Link um die Accounts zu verknüpfen: {}".format(authkey_link)
+        message = "Hallo {}! Es scheint als wäre dein Teamspeak User nicht mit der Kellerkompanie Webseite verknüpft. " \
+                  "Klicke auf folgenden Link um die Accounts zu verknüpfen:\n\n{}".format(client_name, authkey_link)
         self.ts3conn.sendtextmessage(targetmode=1, target=client_id, msg=message)
 
     def start_bot(self):
@@ -182,15 +182,15 @@ class KeKoBot:
             client_id = int(client["clid"])
             if client_id == self.client_id:
                 continue
-            client_nickname = client["client_nickname"]
+            client_name = client["client_nickname"]
             client_info = self.ts3conn.clientinfo(client_id)
             client_uid = client_info["client_unique_identifier"]
-            client = Client(client_id=client_id, client_uid=client_uid, client_name=client_nickname)
+            client = Client(client_id=client_id, client_uid=client_uid, client_name=client_name)
             self.set_client(client_id, client)
             print("\t", client)
 
             if not self.database.has_user_id(client_uid):
-                self.send_link_account_message(client_id, client_uid)
+                self.send_link_account_message(client_id, client_uid, client_name)
 
         # Move the Query client
         self.ts3conn.clientmove(channel, self.client_id)

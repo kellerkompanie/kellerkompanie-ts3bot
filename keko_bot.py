@@ -173,10 +173,15 @@ class KeKoBot:
         except ts3API.TS3Connection.TS3QueryException:
             pass
 
+        # Find own client id
+        self.client_id = int(self.ts3conn.whoami()["client_id"])
+
         # Iterate through all currently connected clients
         print("currently connected clients:")
         for client in self.ts3conn.clientlist():
             client_id = int(client["clid"])
+            if client_id == self.client_id:
+                continue
             client_nickname = client["client_nickname"]
             client_info = self.ts3conn.clientinfo(client_id)
             client_uid = client_info["client_unique_identifier"]
@@ -186,11 +191,6 @@ class KeKoBot:
 
             if not self.database.has_user_id(client_uid):
                 self.send_link_account_message(client_id, client_uid)
-
-        # Find own client id
-        self.client_id = int(self.ts3conn.whoami()["client_id"])
-
-        info = self.ts3conn.whoami()
 
         # Move the Query client
         self.ts3conn.clientmove(channel, self.client_id)

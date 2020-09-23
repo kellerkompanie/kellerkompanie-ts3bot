@@ -161,7 +161,7 @@ class Database:
     def has_squad_xml_entry(self, steam_id):
         connection = self.create_connection(webpage=True)
         cursor = connection.cursor()
-        query = "SELECT FROM squad_xml_entries WHERE player_id=%s;"
+        query = "SELECT * FROM squad_xml_entries WHERE player_id=%s;"
         cursor.execute(query, (steam_id,))
         row = cursor.fetchone()
         cursor.close()

@@ -15,11 +15,17 @@ class Database:
         self._load_config()
         self._insert_default_welcome_messages()
 
-    def create_connection(self):
-        return pymysql.connect(host=self._settings['db_host'],
-                               database=self._settings['db_name'],
-                               user=self._settings['db_username'],
-                               password=self._settings['db_password'])
+    def create_connection(self, webpage=False):
+        if webpage:
+            return pymysql.connect(host=self._settings['db_host'],
+                                   database=self._settings['db_name_webpage'],
+                                   user=self._settings['db_username_webpage'],
+                                   password=self._settings['db_password_webpage'])
+        else:
+            return pymysql.connect(host=self._settings['db_host'],
+                                   database=self._settings['db_name_teamspeak'],
+                                   user=self._settings['db_username_teamspeak'],
+                                   password=self._settings['db_password_teamspeak'])
 
     def _load_config(self):
         if os.path.exists(CONFIG_FILEPATH):
@@ -27,9 +33,12 @@ class Database:
                 self._settings = json.load(json_file)
         else:
             self._settings = {'db_host': 'localhost',
-                              'db_name': 'arma3',
-                              'db_username': 'username',
-                              'db_password': 'password'}
+                              'db_name_teamspeak': 'arma3',
+                              'db_username_teamspeak': 'username',
+                              'db_password_teamspeak': 'password',
+                              'db_name_webpage': 'arma3',
+                              'db_username_webpage': 'username',
+                              'db_password_webpage': 'password'}
 
             with open(CONFIG_FILEPATH, 'w') as outfile:
                 json.dump(self._settings, outfile, sort_keys=True, indent=4)
@@ -148,3 +157,22 @@ class Database:
         connection.close()
 
         return "https://kellerkompanie.com/teamspeak/link_account.php?authkey=" + authkey
+
+    def has_squad_xml_entry(self, steam_id):
+        connection = self.create_connection(webpage=True)
+        cursor = connection.cursor()
+        query = "SELECT FROM squad_xml_entries WHERE player_id=%s;"
+        cursor.execute(query, (steam_id,))
+        row = cursor.fetchone()
+        cursor.close()
+        connection.close()
+        return row is not None
+
+    def create_squad_xml_entry(self, steam_id, nick):
+        connection = self.create_connection(webpage=True)
+        cursor = connection.cursor()
+        query = "INSERT INTO squad_xml_entries (player_id, nick) VALUES (%s,%s);"
+        cursor.execute(query, (steam_id, nick, ))
+        connection.commit()
+        cursor.close()
+        connection.close()

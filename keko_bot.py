@@ -138,6 +138,7 @@ class KeKoBot:
         elif not self.database.has_user_id(client_uid):
             self.send_link_account_message(client)
         else:
+            self.update_squad_xml_entry(client)
             self.update_stammspieler_status(client)
 
     def is_guest(self, client_id):
@@ -165,6 +166,15 @@ class KeKoBot:
         client_info = self.ts3conn.clientinfo(client_id=client_id)
         client_group_ids = [int(x) for x in client_info['client_servergroups'].split(',')]
         return client_group_ids
+
+    def update_squad_xml_entry(self, client: Client):
+        steam_id = self.database.get_steam_id(client.client_uid)
+
+        if not self.database.has_squad_xml_entry(steam_id):
+            username_url = "https://server.kellerkompanie.com:5000/username/{}".format(steam_id)
+            nick = requests.get(username_url).text
+            if nick and len(nick) > 0:
+                self.database.create_squad_xml_entry(steam_id, nick)
 
     def update_stammspieler_status(self, client: Client):
         stammspieler_sgid = self.get_server_group_by_name("Stammspieler")
@@ -247,6 +257,7 @@ class KeKoBot:
             elif not self.database.has_user_id(client_uid):
                 self.send_link_account_message(client=client)
             else:
+                self.update_squad_xml_entry(client=client)
                 self.update_stammspieler_status(client=client)
 
         # Move the Query client

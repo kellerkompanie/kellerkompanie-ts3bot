@@ -6,6 +6,7 @@ import random
 import string
 
 import pymysql
+import requests
 
 CONFIG_FILEPATH = 'database_config.json'
 
@@ -176,3 +177,6 @@ class Database:
         connection.commit()
         cursor.close()
         connection.close()
+
+        # call webpage to actually write the new squad.xml file
+        requests.get("https://kellerkompanie.com/profile.php?update_squad_xml=true")

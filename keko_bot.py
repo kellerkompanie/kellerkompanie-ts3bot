@@ -174,7 +174,7 @@ class KeKoBot:
         steam_id = self.database.get_steam_id(client.client_uid)
 
         if not self.database.has_squad_xml_entry(steam_id):
-            username_url = "https://server.kellerkompanie.com:5000/username/{}".format(steam_id)
+            username_url = "http://server.kellerkompanie.com:5000/username/{}".format(steam_id)
             nick = requests.get(username_url).text
             if nick and len(nick) > 0:
                 self.database.create_squad_xml_entry(steam_id, nick)
@@ -182,7 +182,7 @@ class KeKoBot:
     def update_stammspieler_status(self, client: Client):
         stammspieler_sgid = self.get_server_group_by_name("Stammspieler")
         steam_id = self.database.get_steam_id(client.client_uid)
-        stammspieler_url = "https://server.kellerkompanie.com:5000/stammspieler/{}".format(steam_id)
+        stammspieler_url = "http://server.kellerkompanie.com:5000/stammspieler/{}".format(steam_id)
         response = requests.get(stammspieler_url)
         stammspieler_status = bool(json.loads(response.text)['stammspieler'])
 

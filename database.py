@@ -5,10 +5,11 @@ import os
 import random
 import string
 
+import logging
 import pymysql
 import requests
 
-CONFIG_FILEPATH = 'database_config.json'
+CONFIG_FILEPATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database_config.json')
 
 
 class Database:
@@ -29,6 +30,8 @@ class Database:
                                    password=self._settings['db_password_teamspeak'])
 
     def _load_config(self):
+        logging.info(f'Loading Database config from {CONFIG_FILEPATH}')
+
         if os.path.exists(CONFIG_FILEPATH):
             with open(CONFIG_FILEPATH) as json_file:
                 self._settings = json.load(json_file)

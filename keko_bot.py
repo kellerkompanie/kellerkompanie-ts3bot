@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import logging
 import os
 
 import requests
@@ -11,7 +12,7 @@ import ts3API.TS3Connection
 from database import Database
 from ts3API.TS3Connection import TS3Connection
 
-CONFIG_FILEPATH = 'keko_bot.json'
+CONFIG_FILEPATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'keko_bot.json')
 
 
 class Client:
@@ -41,6 +42,8 @@ class KeKoBot:
         self.database = Database()
 
     def load_settings(self):
+        logging.info(f'Loading KeKoBot config from {CONFIG_FILEPATH}')
+
         if os.path.exists(CONFIG_FILEPATH):
             with open(CONFIG_FILEPATH) as json_file:
                 settings = json.load(json_file)

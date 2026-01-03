@@ -285,6 +285,10 @@ class KeKoBot:
         self.ts3conn.start_keepalive_loop()
 
 
-if __name__ == "__main__":
+def main():
     keko_bot = KeKoBot()
     keko_bot.start_bot()
+
+
+if __name__ == "__main__":
+    main()

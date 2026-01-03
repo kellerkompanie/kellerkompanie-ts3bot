@@ -1,0 +1,6 @@
+{
+  "db_host": "localhost",
+  "db_name": "keko_teamspeak",
+  "db_password": "password",
+  "db_username": "keko_teamspeak"
+}

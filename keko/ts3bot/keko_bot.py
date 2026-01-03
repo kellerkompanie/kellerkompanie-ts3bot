@@ -1,7 +1,5 @@
-import asyncio
 import json
 import logging
-import os
 
 import requests
 
@@ -15,9 +13,8 @@ from keko.ts3api import (
     TS3Event,
     TS3QueryError,
 )
+from keko.ts3bot.config import Settings
 from keko.ts3bot.database import Database
-
-CONFIG_FILEPATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'keko_bot.json')
 
 logger = logging.getLogger(__name__)
 
@@ -33,48 +30,18 @@ class Client:
         return f"{self.client_name} [id:{self.client_id} uid:{self.client_uid}]"
 
 
-class KeKoBot:
-    def __init__(self) -> None:
+class TS3Bot:
+    def __init__(self, settings: Settings) -> None:
+        self._settings = settings
         self.connected_clients: dict[int, Client] = {}
         self.ts3conn: TS3Connection | None = None
-        self.user = 'serveradmin'
-        self.password = 'password'
-        self.host = '0.0.0.0'
-        self.port = 10011
-        self.nickname = 'Kellerkompanie Bot'
-        self.default_channel = 'Botchannel'
-        self.server_id = 1
         self.client_id: int | None = None
-        self.load_settings()
-        self.database = Database()
+        self.database = Database(self._settings)
 
-    def load_settings(self) -> None:
-        logger.info(f'Loading KeKoBot config from {CONFIG_FILEPATH}')
-
-        if os.path.exists(CONFIG_FILEPATH):
-            with open(CONFIG_FILEPATH) as json_file:
-                settings = json.load(json_file)
-        else:
-            settings = {
-                'host': self.host,
-                'port': self.port,
-                'user': self.user,
-                'password': self.password,
-                'default_channel': self.default_channel,
-                'server_id': self.server_id,
-                'nickname': self.nickname,
-            }
-
-            with open(CONFIG_FILEPATH, 'w') as outfile:
-                json.dump(settings, outfile, sort_keys=True, indent=4)
-
-        self.user = settings['user']
-        self.password = settings['password']
-        self.host = settings['host']
-        self.port = settings['port']
-        self.nickname = settings['nickname']
-        self.server_id = settings['server_id']
-        self.default_channel = settings['default_channel']
+    @property
+    def ts3(self):
+        """Shortcut to TS3 settings."""
+        return self._settings.ts3
 
     async def current_channel_id(self) -> int:
         assert self.ts3conn is not None
@@ -160,7 +127,7 @@ class KeKoBot:
         )
         self.set_client(client_id, client)
 
-        print("client entered", client)
+        logger.info("client entered: %s", client)
 
         if await self.is_guest(client_id):
             message = self.database.get_guest_welcome_message()
@@ -215,21 +182,21 @@ class KeKoBot:
         client_is_in_group = await self.is_client_in_group(client.client_id, "Stammspieler")
 
         if stammspieler_status and not client_is_in_group:
-            print(f"adding user {client.client_name} to server group stammspieler")
+            logger.info("adding user %s to server group stammspieler", client.client_name)
             await self.ts3conn.servergroupaddclient(sgid=stammspieler_sgid, cldbid=client.client_dbid)
         elif not stammspieler_status and client_is_in_group:
-            print(f"removing user {client.client_name} from server group stammspieler")
+            logger.info("removing user %s from server group stammspieler", client.client_name)
             await self.ts3conn.servergroupdelclient(sgid=stammspieler_sgid, cldbid=client.client_dbid)
 
     async def on_client_left(self, event: ClientLeftEvent) -> None:
         client_id = event.client_id
         client = self.get_client(client_id)
         del self.connected_clients[int(client_id)]
-        print("client left", client)
+        logger.info("client left: %s", client)
 
     @staticmethod
     def on_client_moved_to_own_channel(client: Client) -> None:
-        print("client entered own channel:", client)
+        logger.debug("client entered own channel: %s", client)
 
     async def send_link_account_message(self, client: Client) -> None:
         assert self.ts3conn is not None
@@ -242,25 +209,25 @@ class KeKoBot:
         await self.ts3conn.sendtextmessage(targetmode=1, target=client.client_id, msg=message)
 
     async def start_bot(self) -> None:
-        print("Kellerkompanie Bot starting")
-        print(f"connecting to {self.host}:{self.port} as {self.nickname}")
+        logger.info("Kellerkompanie Bot starting")
+        logger.info("connecting to %s:%d as %s", self.ts3.host, self.ts3.port, self.ts3.nickname)
 
-        async with TS3Connection(self.host, self.port) as conn:
+        async with TS3Connection(self.ts3.host, self.ts3.port) as conn:
             self.ts3conn = conn
 
             # Login with query credentials
-            await conn.login(self.user, self.password)
+            await conn.login(self.ts3.user, self.ts3.password)
 
             # Choose a virtual server
-            await conn.use(self.server_id)
+            await conn.use(self.ts3.server_id)
 
             # Find the channel to move the query client to
-            channels = await conn.channelfind(pattern=self.default_channel)
+            channels = await conn.channelfind(pattern=self.ts3.default_channel)
             channel = int(channels[0]["cid"])
 
             # Give the Query Client a name
             try:
-                await conn.clientupdate(client_nickname=self.nickname)
+                await conn.clientupdate(client_nickname=self.ts3.nickname)
             except TS3QueryError:
                 pass
 
@@ -269,7 +236,7 @@ class KeKoBot:
             self.client_id = int(whoami["client_id"])
 
             # Iterate through all currently connected clients
-            print("currently connected clients:")
+            logger.info("currently connected clients:")
             for client_data in await conn.clientlist():
                 client_id = int(client_data["clid"])
                 client_name = client_data["client_nickname"]
@@ -283,7 +250,7 @@ class KeKoBot:
                     client_dbid=client_dbid,
                 )
                 self.set_client(client_id, client)
-                print("\t", client)
+                logger.info("  %s", client)
 
                 if client_id == self.client_id:
                     continue
@@ -313,12 +280,3 @@ class KeKoBot:
             # Event loop
             async for event in conn.events():
                 await self.on_event(event)
-
-
-def main() -> None:
-    keko_bot = KeKoBot()
-    asyncio.run(keko_bot.start_bot())
-
-
-if __name__ == "__main__":
-    main()

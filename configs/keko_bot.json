@@ -1,9 +1,0 @@
-{
-  "default_channel": "TechSupport / RapeDungeon",
-  "host": "ts.kellerkompanie.com",
-  "nickname": "Kellerkompanie Bot",
-  "password": "password",
-  "port": 10011,
-  "server_id": 1,
-  "user": "serverqueryusername"
-}

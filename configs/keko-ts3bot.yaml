@@ -1,0 +1,26 @@
+ts3:
+  host: "127.0.0.1"
+  port: 10011
+  user: "kellerkompanie-root"
+  password: "password"
+  nickname: "Kellerkompanie Bot"
+  default_channel: "TechSupport / RapeDungeon"
+  server_id: 1
+
+database:
+  teamspeak:
+    host: "localhost"
+    name: "keko_teamspeak"
+    username: "keko_teamspeak"
+    password: "password"
+  webpage:
+    host: "localhost"
+    name: "keko_webpage"
+    username: "keko_webpage"
+    password: "password"
+
+messages:
+  guest_welcome: |
+    Herzlich Willkommen auf dem Kellerkompanie Teamspeak!
+
+    Wenn du neu hier bist, setze dich einfach in den Channel "Ich bin neu hier, bitte helft mir!" und warte geduldig bis jemand zu dir kommt. Deine aktuelle Gruppe ist "Guest" und hat nur eingeschränkte Rechte, bspw. kannst du Leute anschreiben, aber nicht anstupsen.

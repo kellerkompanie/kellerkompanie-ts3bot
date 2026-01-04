@@ -1,25 +1,55 @@
+# =============================================================================
+# Kellerkompanie TeamSpeak 3 Bot Configuration
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# TeamSpeak 3 Server Query Connection
+# -----------------------------------------------------------------------------
 ts3:
+  # Hostname or IP address of the TeamSpeak 3 server
   host: "127.0.0.1"
+
+  # ServerQuery port (default: 10011 for raw, 10022 for SSH)
   port: 10011
+
+  # ServerQuery login username
   user: "kellerkompanie-root"
+
+  # ServerQuery login password
   password: "password"
+
+  # Bot display name shown in TeamSpeak
   nickname: "Kellerkompanie Bot"
+
+  # Channel the bot moves to after connecting (exact channel name)
   default_channel: "TechSupport / RapeDungeon"
+
+  # Virtual server ID to connect to (usually 1)
   server_id: 1
 
+# -----------------------------------------------------------------------------
+# Database Configuration
+# -----------------------------------------------------------------------------
 database:
+  # TeamSpeak database - stores account links, auth keys, and messages
   teamspeak:
     host: "localhost"
     name: "keko_teamspeak"
     username: "keko_teamspeak"
     password: "password"
+
+  # Webpage database - used for Squad XML roster synchronization
   webpage:
     host: "localhost"
     name: "keko_webpage"
     username: "keko_webpage"
     password: "password"
 
+# -----------------------------------------------------------------------------
+# Message Templates
+# -----------------------------------------------------------------------------
 messages:
+  # Welcome message sent to new guest users when they connect
   guest_welcome: |
     Herzlich Willkommen auf dem Kellerkompanie Teamspeak!
 

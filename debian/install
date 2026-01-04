@@ -1,0 +1,3 @@
+dist/keko-ts3bot usr/bin
+debian/keko-ts3bot.service usr/lib/systemd/system
+configs/keko-ts3bot.yaml etc/keko-ts3bot

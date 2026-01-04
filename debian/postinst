@@ -1,0 +1,52 @@
+#!/bin/sh
+set -e
+
+DATA_DIR="/var/lib/keko-ts3bot"
+CONFIG_DIR="/etc/keko-ts3bot"
+
+case "$1" in
+    configure)
+        echo ""
+        echo "============================================"
+        echo "  Kellerkompanie TeamSpeak 3 Bot"
+        echo "============================================"
+        echo ""
+
+        # Create ts3bot system user if it doesn't exist
+        if ! id -u ts3bot >/dev/null 2>&1; then
+            echo "Creating system user 'ts3bot'..."
+            useradd --system --no-create-home --shell /usr/sbin/nologin ts3bot
+        fi
+
+        # Create data directory
+        mkdir -p "$DATA_DIR"
+        chown ts3bot:ts3bot "$DATA_DIR"
+
+        # Reload systemd daemon
+        systemctl daemon-reload
+
+        # Enable and start the service
+        systemctl enable keko-ts3bot
+        systemctl start keko-ts3bot
+
+        echo "Service started successfully!"
+        echo ""
+        echo "Configuration: $CONFIG_DIR/keko-ts3bot.yaml"
+        echo "View logs: journalctl -u keko-ts3bot -f"
+        echo ""
+        echo "IMPORTANT: Edit the configuration file and restart the service:"
+        echo "  sudo nano $CONFIG_DIR/keko-ts3bot.yaml"
+        echo "  sudo systemctl restart keko-ts3bot"
+        echo ""
+        ;;
+    abort-upgrade|abort-remove|abort-deconfigure)
+        ;;
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

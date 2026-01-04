@@ -12,15 +12,15 @@ case "$1" in
         echo "============================================"
         echo ""
 
-        # Create ts3bot system user if it doesn't exist
-        if ! id -u ts3bot >/dev/null 2>&1; then
-            echo "Creating system user 'ts3bot'..."
-            useradd --system --no-create-home --shell /usr/sbin/nologin ts3bot
+        # Create teamspeak3bot system user if it doesn't exist
+        if ! id -u teamspeak3bot >/dev/null 2>&1; then
+            echo "Creating system user 'teamspeak3bot'..."
+            useradd --system --no-create-home --shell /usr/sbin/nologin teamspeak3bot
         fi
 
         # Create data directory
         mkdir -p "$DATA_DIR"
-        chown ts3bot:ts3bot "$DATA_DIR"
+        chown teamspeak3bot:teamspeak3bot "$DATA_DIR"
 
         # Reload systemd daemon
         systemctl daemon-reload

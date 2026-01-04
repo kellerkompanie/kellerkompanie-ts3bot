@@ -6,8 +6,8 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=ts3bot
-Group=ts3bot
+User=teamspeak3bot
+Group=teamspeak3bot
 WorkingDirectory=/var/lib/keko-ts3bot
 ExecStart=/usr/bin/keko-ts3bot --config /etc/keko-ts3bot/keko-ts3bot.yaml
 Restart=always

@@ -1,6 +1,6 @@
 [Unit]
 Description=Kellerkompanie TeamSpeak 3 Bot
-Documentation=https://github.com/kellerkompanie/kellerkompanie-ts3bot
+Documentation=https://github.com/kellerkompanie/kellerkompanie-teamspeak3-bot
 After=network-online.target
 Wants=network-online.target
 
